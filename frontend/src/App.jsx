@@ -1,4 +1,7 @@
 import { useState } from "react"
+import Header from "./components/Header"
+import TaskList from "./components/TaskList"
+import TaskInput from "./components/TaskInput"
 
 function App() {
 
@@ -15,9 +18,18 @@ function App() {
   }
 
   return (
+    
     <div>
+      <Header title="AI STUDY PLANNER" />
 
-      <h1>AI Study Planner</h1>
+      <TaskInput 
+      task={task}
+      setTask = {setTask}
+      addTask={addTask}
+      />
+      
+      <TaskList tasks={tasks} />
+     { /*<h1>AI Study Planner</h1>
 
       <input
         type="text"
@@ -34,7 +46,7 @@ function App() {
         {tasks.map((t, index) => (
           <li key={index}>{t}</li>
         ))}
-      </ul>
+      </ul>*/}
 
     </div>
   )
