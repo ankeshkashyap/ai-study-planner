@@ -21,12 +21,13 @@ function App() {
     setTasks(newTasks)
   }
   function updateTask(index){
+    
     const newTask = prompt ("Enter new task")
 
     if (!newTask) return
 
     const updatedTasks = [...tasks]
-    updatedTasks [index]=newTasks 
+    updatedTasks [index]=newTask
 
     setTasks(updatedTasks)
   }
