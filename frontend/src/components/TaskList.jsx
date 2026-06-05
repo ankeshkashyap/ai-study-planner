@@ -1,10 +1,17 @@
-function TaskList ({tasks}){
+function TaskList ({tasks , deleteTask, updateTask}){
     return (
-        <ul>
+        <ul style={{listStylePosition:"inside"}}>
             {tasks.map((task, index)=>(
-                <li key = {index}>{task}</li>
+                <li key = {index}>{task}
+                
+                <button onClick={()=>deleteTask(index)}>Delete</button>
+            
+                <button onClick={()=>updateTask(index)}>Edit</button>
+        
+                </li>
             ))}
-        </ul>
+
+           </ul>
     );
 }
 export default TaskList;

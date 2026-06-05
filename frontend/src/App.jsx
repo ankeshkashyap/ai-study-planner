@@ -16,39 +16,39 @@ function App() {
 
     setTask("")
   }
+  function deleteTask (indexToDelete){
+    const newTasks = tasks.filter((_,index)=> index !==indexToDelete)
+    setTasks(newTasks)
+  }
+  function updateTask(index){
+    const newTask = prompt ("Enter new task")
+
+    if (!newTask) return
+
+    const updatedTasks = [...tasks]
+    updatedTasks [index]=newTasks 
+
+    setTasks(updatedTasks)
+  }
 
   return (
     
     <div>
       <Header title="AI STUDY PLANNER" />
-
       <TaskInput 
       task={task}
       setTask = {setTask}
       addTask={addTask}
       />
       
-      <TaskList tasks={tasks} />
-     { /*<h1>AI Study Planner</h1>
+      <p>Total Tasks : {tasks.length}</p>
 
-      <input
-        type="text"
-        placeholder="Enter task"
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-      />
 
-      <button onClick={addTask}>
-        Add Task
-      </button>
-
-      <ul style={{ listStylePosition: "inside" }}>
-        {tasks.map((t, index) => (
-          <li key={index}>{t}</li>
-        ))}
-      </ul>*/}
-
-    </div>
+      <TaskList 
+        tasks={tasks}
+        updateTask={updateTask}
+        deleteTask={deleteTask} />
+     </div>
   )
 }
 
