@@ -2,6 +2,8 @@ import { useState } from "react"
 import Header from "./components/Header"
 import TaskList from "./components/TaskList"
 import TaskInput from "./components/TaskInput"
+import Navbar from "./components/Navbar"
+import Sidebar from "./components/Sidebar"
 
 function App() {
 
@@ -34,21 +36,32 @@ function App() {
 
   return (
     
+    
     <div>
-      <Header title="AI STUDY PLANNER" />
+      <Navbar />
+
+      <div className="flex">
+        <Sidebar />
+      
+
+
+      <h2 className=" text-4xl font-bold mb-6 ">Dashboard </h2>
+      <div className="flex-1 p-6">
       <TaskInput 
       task={task}
       setTask = {setTask}
       addTask={addTask}
       />
       
-      <p>Total Tasks : {tasks.length}</p>
+      <p className="text-grey-600 mb-4">Total Tasks : {tasks.length}</p>
 
 
       <TaskList 
         tasks={tasks}
         updateTask={updateTask}
         deleteTask={deleteTask} />
+        </div>
+        </div>
      </div>
   )
 }
