@@ -6,7 +6,7 @@ function TaskInput ({
     return(
         <>
         <input 
-            className="bordeer p-2 rounded-lg mr-2 border to-black "
+            className="bordeer p-2 rounded-lg m-3 border to-black "
             placeholder="Enter task"
             value={task}
             onChange={(e) => setTask(e.target.value)} 
