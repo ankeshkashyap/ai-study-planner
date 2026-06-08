@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState , useEffect} from "react"
 import Header from "./components/Header"
 import TaskList from "./components/TaskList"
 import TaskInput from "./components/TaskInput"
@@ -9,6 +9,22 @@ function App() {
 
   const [task, setTask] = useState("")
   const [tasks, setTasks] = useState([])
+  const[isLoaded, setIsLoaded]=useState(false)
+
+  useEffect(()=>{
+    const savedTasks = localStorage.getItem("tasks")
+
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks))
+    }
+    setIsLoaded(true)
+  },[])
+
+  useEffect(()=> {
+    if(isLoaded){
+   localStorage.setItem("tasks",JSON.stringify(tasks))
+  }
+ } , [tasks, isLoaded])
 
   function addTask() {
 
