@@ -11,6 +11,15 @@ function App() {
   const [tasks, setTasks] = useState([])
   const[isLoaded, setIsLoaded]=useState(false)
 
+  useEffect(()=>
+  {
+     fetch("http://127.0.0.1:8000/tasks")
+     .then(response => response.json())
+     .then(data => {
+      setTasks(data)
+     })
+  },[])
+
   useEffect(()=>{
     const savedTasks = localStorage.getItem("tasks")
 
