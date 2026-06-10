@@ -1,3 +1,4 @@
+import psycopg2
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,9 +18,29 @@ def home ():
 
 @app.get("/tasks")
 def get_tasks():
-    return[
-        {"title":"GATE","completed":False},
-        {"title":"Machine Learning","completed":True}
-        ]
+    conn = psycopg2.connect(
+    host="localhost",
+    database="studyplanner",
+    user ="postgres",
+    password="0709"
+)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * from tasks;")
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close
+    tasks=[]
+    for row in rows :
+        task={
+            "id":row[0],
+            "title":row[1],
+            "completed":row[2]
+        }
+        tasks.append(task)
+    
+    return tasks
+
+
 
 
