@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-
+from passlib.hash import bcrypt
+from jose import jwt
 
 app = FastAPI()
 
@@ -112,6 +113,65 @@ def get_tasks():
         tasks.append(task)
     
     return tasks
+
+class UserCreate(BaseModel):
+    username : str
+    password : str
+
+@app.post("/signup")
+def signup(user: UserCreate):
+
+    hashed_password = bcrypt.hash(user.password)
+    
+    conn = psycopg2.connect(
+        host="localhost",
+        database="studyplanner",
+        user ="postgres",
+        password="0709"
+    )
+    cursor=conn.cursor()
+
+    cursor.execute("INSERT INTO users (username,password) VALUES (%s,%s)",(user.username,hashed_password))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+
+    return{"message":"User created"}
+
+SECRET_KEY="mysecretkey"
+ALGORITHM="HS256"
+
+class UserLogin(BaseModel):
+    username:str
+    password: str
+@app.post("/login")
+def login(user: UserLogin):
+    conn = psycopg2.connect(
+        host="localhost",
+        database="studyplanner",
+        user ="postgres",
+        password="0709"
+    )
+    cursor=conn.cursor()
+
+    cursor.execute("SELECT password From users WHERE username =%s",(user.username,))
+
+    row=cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if row is None :
+        return{"message":"Invalid username/password"}
+    
+    stored_hash= row[0]
+
+    if bcrypt.verify(user.password,stored_hash):
+        return{"message":"Login successfull"}
+    
+    return{"message":"Invalid username/password"}
+    
 
 
 
