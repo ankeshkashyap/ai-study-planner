@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 from passlib.hash import bcrypt
 from jose import jwt
+from fastapi import Header 
 
 app = FastAPI()
 
@@ -90,7 +91,11 @@ def home ():
     return {"message": "AI study planner Backend Working"}
 
 @app.get("/tasks")
-def get_tasks():
+def get_tasks(authorization: str= Header()):
+
+    token = authorization.replace ("Bearer","")
+    username = get_current_user(token)
+
     conn = psycopg2.connect(
     host="localhost",
     database="studyplanner",
@@ -98,19 +103,28 @@ def get_tasks():
     password="0709"
 )
     cursor = conn.cursor()
-    cursor.execute("SELECT * from tasks;")
+
+    cursor.execute("SELECT id FROM users WHERE username =%s",(username,))
+    row=cursor.fetchone()
+
+    if row is None:
+        return {"message":"User not found"}
+
+    user_id= row[0]
+    cursor.execute("SELECT * FROM tasks WHERE user_id = %s",(user_id,))
+
     rows = cursor.fetchall()
+
+    tasks = []
+    for row in rows :
+        tasks.append ({
+            "id":row[0],
+            "title": row[1],
+            "completed":row[2]
+        })
 
     cursor.close()
     conn.close
-    tasks=[]
-    for row in rows :
-        task={
-            "id":row[0],
-            "title":row[1],
-            "completed":row[2]
-        }
-        tasks.append(task)
     
     return tasks
 
@@ -168,9 +182,37 @@ def login(user: UserLogin):
     stored_hash= row[0]
 
     if bcrypt.verify(user.password,stored_hash):
-        return{"message":"Login successfull"}
-    
+        token= jwt.encode(
+            {
+                "username":user.username
+            },
+            SECRET_KEY,
+            algorithm=ALGORITHM
+        )
+        return{
+            "access_token":token
+        }
     return{"message":"Invalid username/password"}
+
+@app.get("/me")
+def get_me():
+
+    payload = jwt.decode(
+         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFua2VzaCJ9.L7Mmp3Dp4g7qDt0fcFRT-utlIMvjQ9135z7178fsK5o",
+        SECRET_KEY,
+        algorithms=[ALGORITHM]
+    )
+    return payload
+
+def get_current_user (token: str):
+     payload = jwt.decode(
+         token,
+         SECRET_KEY,
+        algorithms=[ALGORITHM]
+    )
+     
+     username= payload["username"]
+     return username
     
 
 
