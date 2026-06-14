@@ -84,6 +84,15 @@ def delete_task(id:int):
     return {"message":"Task deleted"}
     
 
+def get_current_user (token: str):
+     payload = jwt.decode(
+         token,
+         SECRET_KEY,
+        algorithms=[ALGORITHM]
+    )
+     
+     username= payload["username"]
+     return username
 
 
 @app.get("/")
@@ -92,8 +101,9 @@ def home ():
 
 @app.get("/tasks")
 def get_tasks(authorization: str= Header()):
+    return {"authorization": authorization }
 
-    token = authorization.replace ("Bearer","")
+    token = authorization.replace ("Bearer ","")
     username = get_current_user(token)
 
     conn = psycopg2.connect(
@@ -204,15 +214,6 @@ def get_me():
     )
     return payload
 
-def get_current_user (token: str):
-     payload = jwt.decode(
-         token,
-         SECRET_KEY,
-        algorithms=[ALGORITHM]
-    )
-     
-     username= payload["username"]
-     return username
     
 
 
