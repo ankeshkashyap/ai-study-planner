@@ -1,11 +1,12 @@
 import psycopg2
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from passlib.hash import bcrypt
 from jose import jwt
-from fastapi import Header 
+from fastapi import Header
+from fastapi.security import  OAuth2PasswordBearer
 
 app = FastAPI()
 
@@ -82,6 +83,12 @@ def delete_task(id:int):
     conn.close()
 
     return {"message":"Task deleted"}
+
+
+SECRET_KEY="mysecretkey"
+ALGORITHM="HS256"
+
+oauth2_scheme=OAuth2PasswordBearer(tokenUrl="login")
     
 
 def get_current_user (token: str):
@@ -100,11 +107,9 @@ def home ():
     return {"message": "AI study planner Backend Working"}
 
 @app.get("/tasks")
-def get_tasks(authorization: str= Header()):
-    return {"authorization": authorization }
-
-    token = authorization.replace ("Bearer ","")
+def get_tasks(token: str= Depends(oauth2_scheme)):
     username = get_current_user(token)
+    print ("Username= ", username)
 
     conn = psycopg2.connect(
     host="localhost",
@@ -134,7 +139,7 @@ def get_tasks(authorization: str= Header()):
         })
 
     cursor.close()
-    conn.close
+    conn.close()
     
     return tasks
 
@@ -163,9 +168,6 @@ def signup(user: UserCreate):
 
 
     return{"message":"User created"}
-
-SECRET_KEY="mysecretkey"
-ALGORITHM="HS256"
 
 class UserLogin(BaseModel):
     username:str
