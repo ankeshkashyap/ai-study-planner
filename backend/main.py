@@ -10,6 +10,13 @@ from fastapi.security import  OAuth2PasswordBearer
 
 app = FastAPI()
 
+from fastapi import Request
+
+@app.post("/debug")
+async def debug(request: Request):
+    body = await request.body()
+    return {"body": body.decode()}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins = ["http://localhost:5173","http://127.0.0.1:5173"],
@@ -18,11 +25,30 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+SECRET_KEY="mysecretkey"
+ALGORITHM="HS256"
+
+oauth2_scheme=OAuth2PasswordBearer(tokenUrl="login")
+
+
+
+def get_current_user (token: str):
+     payload = jwt.decode(
+         token,
+         SECRET_KEY,
+        algorithms=[ALGORITHM]
+    )
+     
+     username= payload["username"]
+     return username
+
 class TaskCreate(BaseModel):
     title:str
 
 @app.post("/tasks")
-def create_task(task: TaskCreate):
+def create_task(task: TaskCreate,
+                token: str= Depends(oauth2_scheme)):
+    username = get_current_user(token)
     conn = psycopg2.connect(
         host="localhost",
         database="studyplanner",
@@ -30,8 +56,16 @@ def create_task(task: TaskCreate):
         password="0709"
     )
     cursor=conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE username = %s",(username,))
+    row= cursor.fetchone()
 
-    cursor.execute("INSERT INTO tasks (title,completed) VALUES (%s,%s)",(task.title,False))
+    
+    if row is None:
+        return {"message":"User not found"}
+
+
+    user_id = row[0]
+    cursor.execute("INSERT INTO tasks (title,completed,user_id) VALUES (%s,%s,%s)",(task.title,False,user_id))
     conn.commit()
 
     cursor.close()
@@ -46,7 +80,9 @@ class TaskUpdate(BaseModel):
     title:Optional[str]= None
 
 @app.put("/tasks/{id}")
-def update_task(id: int,task: TaskUpdate):
+def update_task(id: int,task: TaskUpdate,token: str= Depends(oauth2_scheme) ):
+    username = get_current_user(token)
+
     conn = psycopg2.connect(
         host="localhost",
         database="studyplanner",
@@ -54,8 +90,18 @@ def update_task(id: int,task: TaskUpdate):
         password="0709"
     )
     cursor=conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE username = %s",(username,))
+    row= cursor.fetchone()
 
-    cursor.execute("UPDATE tasks SET title =%s, completed = %s WHERE id= %s",(task.title,task.completed,id))
+    if row is None:
+        return {"message":"User not found"}
+
+    user_id = row[0]
+
+    cursor.execute("UPDATE tasks SET title =%s, completed = %s WHERE id= %s AND user_id=%s ",(task.title,task.completed,id,user_id))
+    if cursor.rowcount==0:
+        conn.rollback
+        return {"message":"Task not found or You do not have authority to update it "}
     conn.commit()
 
     cursor.close()
@@ -67,7 +113,9 @@ def update_task(id: int,task: TaskUpdate):
 
 
 @app.delete("/tasks/{id}")
-def delete_task(id:int):
+def delete_task(id:int, token: str= Depends(oauth2_scheme)):
+    username = get_current_user(token)
+
     conn = psycopg2.connect(
         host="localhost",
         database="studyplanner",
@@ -75,8 +123,18 @@ def delete_task(id:int):
         password="0709"
     )
     cursor=conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE username = %s",(username,))
+    row= cursor.fetchone()
 
-    cursor.execute("DELETE FROM tasks WHERE id = %s",(id,))
+    if row is None:
+        return {"message":"User not found"}
+
+    user_id = row[0]
+
+    cursor.execute("DELETE FROM tasks WHERE id = %s AND user_id=%s",(id,user_id))
+    if cursor.rowcount==0:
+        conn.rollback
+        return {"message":"Task not found or You do not have authority to update it "}
     conn.commit()
 
     cursor.close()
@@ -85,21 +143,9 @@ def delete_task(id:int):
     return {"message":"Task deleted"}
 
 
-SECRET_KEY="mysecretkey"
-ALGORITHM="HS256"
 
-oauth2_scheme=OAuth2PasswordBearer(tokenUrl="login")
     
 
-def get_current_user (token: str):
-     payload = jwt.decode(
-         token,
-         SECRET_KEY,
-        algorithms=[ALGORITHM]
-    )
-     
-     username= payload["username"]
-     return username
 
 
 @app.get("/")
