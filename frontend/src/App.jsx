@@ -92,7 +92,7 @@ function App() {
     if (!newTask || newTask.trim()==="") return
 
     const updateTask = tasks[index]
-    const response =  await fetch (`http://127.0.0.1:8000/tasks${updateTask.id}`,
+    const response =  await fetch (`http://127.0.0.1:8000/tasks/${updateTask.id}`,
             {
                 method: "PUT",
                 headers: {
