@@ -92,6 +92,7 @@ function App() {
     if (!newTask || newTask.trim()==="") return
 
     const updateTask = tasks[index]
+    const token = localStorage.getItem("token")
     const response =  await fetch (`http://127.0.0.1:8000/tasks/${updateTask.id}`,
             {
                 method: "PUT",
@@ -103,19 +104,28 @@ function App() {
                     title: newTask 
                 })
             });
+            
             const data =await response.json()
-            console.log(data);
-         
+            setTasks(updateTask)
         }
 
-  function toggleTask(index){
-     const updatedTasks = [...tasks]
-    updatedTasks [index]={
-      ...updatedTasks[index],
-      completed: !updatedTasks [index].completed
+    async  function toggleTask(index){
+     const updateTask = tasks[index]
+    const token = localStorage.getItem("token")
+    const response =  await fetch (`http://127.0.0.1:8000/tasks/${updateTask.id}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type":"application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                completed:!updateTask.completed
+                })
+            });
+            const data =await response.json()
+            console.log(data)
     }
-    setTasks(updatedTasks)
-  }
   const completedTasks = tasks.filter(
     (task)=> task.completed
   )
