@@ -82,8 +82,16 @@ function App() {
     setTask("")
   }
 
-  function deleteTask (indexToDelete){
-    const newTasks = tasks.filter((_,index)=> index !==indexToDelete)
+  async function deleteTask (indexToDelete){
+    const taskToDelete = tasks[indexToDelete]
+    const token = localStorage.getItem("token")
+    const response =  await fetch (`http://127.0.0.1:8000/tasks/${taskToDelete.id}`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }})
+                const newTasks = tasks.filter ((_, index )=> index !== indexToDelete)
     setTasks(newTasks)
   }
 
