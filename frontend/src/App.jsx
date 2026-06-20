@@ -104,9 +104,15 @@ function App() {
                     title: newTask 
                 })
             });
+
+            const updatedTasks=[...tasks]
+            updatedTasks[index] = {
+              ...updatedTasks[index],
+              title: newTask
+            }
             
             const data =await response.json()
-            setTasks(updateTask)
+            setTasks(updatedTasks)
         }
 
     async  function toggleTask(index){
@@ -123,8 +129,14 @@ function App() {
                 completed:!updateTask.completed
                 })
             });
+            const updatedTasks=[...tasks]
+            updatedTasks[index] = {
+              ...updatedTasks[index],
+              completed: !updatedTasks[index].completed
+            }
+            
             const data =await response.json()
-            console.log(data)
+            setTasks(updatedTasks)
     }
   const completedTasks = tasks.filter(
     (task)=> task.completed

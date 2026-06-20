@@ -97,8 +97,17 @@ def update_task(id: int,task: TaskUpdate,token: str= Depends(oauth2_scheme) ):
         return {"message":"User not found"}
 
     user_id = row[0]
+    cursor.execute("SELECT title, completed FROM tasks WHERE id=%s AND user_id= %s",(id,user_id))
+    existing = cursor.fetchone()
+    if existing is None :
+        return{"message": "Task not found"}
+    new_title = task.title if task.title is not None else existing[0]
+    new_completed = task.completed if task.completed is not None else existing[1]
 
-    cursor.execute("UPDATE tasks SET title =%s, completed = %s WHERE id= %s AND user_id=%s ",(task.title,task.completed,id,user_id))
+
+
+
+    cursor.execute("UPDATE tasks SET title =%s, completed = %s WHERE id= %s AND user_id=%s ",(new_title,new_completed,id,user_id))
     if cursor.rowcount==0:
         conn.rollback
         return {"message":"Task not found or You do not have authority to update it "}
