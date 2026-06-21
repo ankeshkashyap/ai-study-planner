@@ -6,16 +6,15 @@ import Navbar from "./components/Navbar"
 import Sidebar from "./components/Sidebar"
 import Dashboard from "./components/Dashboard"
 import Signup from "./components/Signup"
-import Login from "./components/login"
+import Login from "./components/Login"
 
   
 
 
 function App() {
-  const[loggedIn, setloggedIn]=useState(false)
-
-    
-
+  const [showSignup, setShowSignup] = useState(false)
+  const[loggedIn, setloggedIn]=useState(!!localStorage.getItem("token"))
+  const [error , seterror ] = useState("")
   const [task, setTask] = useState("")
   const [tasks, setTasks] = useState([])
   const[isLoaded, setIsLoaded]=useState(false)
@@ -36,15 +35,6 @@ function App() {
      })
   },[loggedIn])
 
-  /*useEffect(()=>{
-    const savedTasks = localStorage.getItem("tasks")
-
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks))
-    }
-    setIsLoaded(true)
-  },[])
-*/
   useEffect(()=> {
     if(isLoaded){
    localStorage.setItem("tasks",JSON.stringify(tasks))
@@ -54,7 +44,13 @@ function App() {
  
   console.log(loggedIn);
   if (!loggedIn){
-    return <Login onLogin={()=>setloggedIn(true)}/>;
+    if (showSignup)
+        return(
+      <Signup goToLogin={()=> setShowSignup(false)}/>
+    );
+    return (
+      <Login onLogin = {()=>setloggedIn(true)} goToSignup={()=> setShowSignup (true)}/>
+    );
   }
 
   async function addTask() {
@@ -83,6 +79,10 @@ function App() {
   }
 
   async function deleteTask (indexToDelete){
+    const confirm = window.confirm("Are you sure you want to delete this task ?")
+    if (!confirm){
+      return
+    }
     const taskToDelete = tasks[indexToDelete]
     const token = localStorage.getItem("token")
     const response =  await fetch (`http://127.0.0.1:8000/tasks/${taskToDelete.id}`,
@@ -150,6 +150,16 @@ function App() {
     (task)=> task.completed
   )
 
+  function logout (){
+    const confirm = window.confirm("Are you sure you want to Logout ?")
+    if (!confirm){
+      return
+    }
+    localStorage.removeItem("token");
+    setloggedIn(false);
+
+  }
+
   return (
     
     
@@ -157,7 +167,7 @@ function App() {
       <Navbar />
 
       <div className="flex">
-        <Sidebar />
+        <Sidebar onLogout={logout}/>
       
        <div className="flex-1 p-6"> 
       <div className="bg-blue-100

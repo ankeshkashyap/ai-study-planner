@@ -1,11 +1,10 @@
 import psycopg2
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI , Header , HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from passlib.hash import bcrypt
 from jose import jwt
-from fastapi import Header
 from fastapi.security import  OAuth2PasswordBearer
 
 app = FastAPI()
@@ -204,7 +203,7 @@ class UserCreate(BaseModel):
 
 @app.post("/signup")
 def signup(user: UserCreate):
-
+    
     hashed_password = bcrypt.hash(user.password)
     
     conn = psycopg2.connect(
@@ -214,6 +213,15 @@ def signup(user: UserCreate):
         password="0709"
     )
     cursor=conn.cursor()
+
+    cursor.execute("SELECT * FROM users WHERE username=%s",(user.username,))
+    existing_user=cursor.fetchone()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=409,
+            detail="Username already exists"
+        )
 
     cursor.execute("INSERT INTO users (username,password) VALUES (%s,%s)",(user.username,hashed_password))
     conn.commit()
@@ -244,7 +252,10 @@ def login(user: UserLogin):
     conn.close()
 
     if row is None :
-        return{"message":"Invalid username/password"}
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
     
     stored_hash= row[0]
 
@@ -259,17 +270,11 @@ def login(user: UserLogin):
         return{
             "access_token":token
         }
-    return{"message":"Invalid username/password"}
+    raise HTTPException(
+            status_code=401,
+            detail="Invalid password"
+        )
 
-@app.get("/me")
-def get_me():
-
-    payload = jwt.decode(
-         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkFua2VzaCJ9.L7Mmp3Dp4g7qDt0fcFRT-utlIMvjQ9135z7178fsK5o",
-        SECRET_KEY,
-        algorithms=[ALGORITHM]
-    )
-    return payload
 
     
 
