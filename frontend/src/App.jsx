@@ -178,12 +178,9 @@ function App() {
       mb-4
       flex
       flex-col
-      items-center">
-      <div>
-        <Dashboard />
-      </div>
-      <p className="text-grey-600 mb-4">Total Tasks : {tasks.length}</p>
-      <p className="text-grey-600 mb-4">Completed : {completedTasks.length}/{tasks.length}</p>
+      items-stretched">
+      
+        <Dashboard tasks={tasks}/>
       
       
       </div>
