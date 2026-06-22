@@ -7,7 +7,7 @@ import Sidebar from "./components/Sidebar"
 import Dashboard from "./components/Dashboard"
 import Signup from "./components/Signup"
 import Login from "./components/Login"
-
+import TaskModal from "./components/TaskModal"
   
 
 
@@ -18,6 +18,7 @@ function App() {
   const [task, setTask] = useState("")
   const [tasks, setTasks] = useState([])
   const[isLoaded, setIsLoaded]=useState(false)
+  const [showModal, setShowModal]=useState(false)
   const token =localStorage.getItem("token");
   useEffect(()=>
   { 
@@ -32,7 +33,7 @@ function App() {
      .then(data => {
       console.log (data)
       setTasks(data)
-     })
+     }) 
   },[loggedIn])
 
   useEffect(()=> {
@@ -53,8 +54,8 @@ function App() {
     );
   }
 
-  async function addTask() {
-        if(task.trim() === "") return
+  async function addTask(title, subject, priority) {
+        if(title.trim() === "" || subject.trim === "") return
 
       const token = localStorage.getItem("token");
       const response =  await fetch ("http://127.0.0.1:8000/tasks",
@@ -65,12 +66,16 @@ function App() {
         Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    title: task
+                    title,
+                    subject,
+                    priority
                 })
             });
     setTasks([...tasks, 
             {
-              title:task,
+              title,
+              subject,
+              priority,
               completed : false
             }
           ])
@@ -184,11 +189,13 @@ function App() {
       
       
       </div>
-      <TaskInput 
-      task={task}
-      setTask = {setTask}
-      addTask={addTask}
-      />
+
+      <button 
+      onClick={()=>setShowModal(true)}
+      className="bg-blue-500 text-white px-4 py-3 rounded-lg">
+      + ADD TASK
+      </button>
+      {showModal && <TaskModal setShowModal={setShowModal} addTask={addTask}/>}
 
       <TaskList 
         tasks={tasks}

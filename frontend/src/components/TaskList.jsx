@@ -1,29 +1,62 @@
 function TaskList ({tasks , deleteTask, updateTask, toggleTask}){
-    return (
-        <ul style={{listStylePosition:"inside"}}>
-            {tasks.map((task, index)=>(
-                <li key = {index}>
 
-                 <div className="
+    
+        return (
+            <div className="mt-6 justify-around items-center">
+                <h2 className="text-2xl font-bold mb-4">Task List</h2>
+                <ul style={{listStylePosition:"inside"}}>
+        
+            {tasks.map((task, index)=>{
+                    let borderColor="";
+
+                    if (task.priority==="High")
+                        borderColor="border-l-red-500";
+
+                    else if (task.priority==="Medium")
+                        borderColor="border-l-yellow-500";
+
+                    else
+                        borderColor="border-l-green-500";
+
+                 return (   
+
+                
+                <li key = {index}>
+                    
+
+                 <div className={`
                  bg-gray-300 
                 border
-                 py-3 px-4
-                 rounded-lg
+                border-l-8 
+                ${borderColor}
+                 py-4 px-5
+                 rounded-xl
+                 shadow-sm
                  mb-4
                  flex
                  justify-between
                  items-center
-                 hover:shadow-md
+                 hover:shadow-lg
                  transitionn
-                 ">
+                 ${task.completed ? "opacity-70":""}
+                 `}>
                     
-                  <span className="flex gap-2, text-xl ">
+                  <div className="flex gap-3, text-xl items-start ">
                         <input type="checkbox" 
                         checked= {task.completed}
                         onChange={()=>toggleTask(index)} />
-                        <span className={task.completed ? "line-through text-green-700":""}>{task.title}</span>
+
+                    <div>
+                        <h2
+                         className={task.completed ? "line-through text-green-700":""}>
+                            {task.title}
+                        </h2>
+
+                        <p className="text-sm text-gray-600">{task.subject}</p>
+                        <p className="text-sm text-gray-600">{task.priority}</p>
                         
-                  </span>
+                  </div>
+                  </div>
                     
                     
 
@@ -39,9 +72,14 @@ function TaskList ({tasks , deleteTask, updateTask, toggleTask}){
                 </div>
                 </div>
                 </li>
-            ))}
+                 );
+})}
 
-           </ul>
-    );
+        </ul>
+        </div>
+        );
+
+
+    
 }
 export default TaskList;

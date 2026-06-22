@@ -43,6 +43,8 @@ def get_current_user (token: str):
 
 class TaskCreate(BaseModel):
     title:str
+    subject:str
+    priority:str
 
 @app.post("/tasks")
 def create_task(task: TaskCreate,
@@ -64,7 +66,7 @@ def create_task(task: TaskCreate,
 
 
     user_id = row[0]
-    cursor.execute("INSERT INTO tasks (title,completed,user_id) VALUES (%s,%s,%s)",(task.title,False,user_id))
+    cursor.execute("INSERT INTO tasks (title,subject, priority, completed,user_id) VALUES (%s,%s,%s,%s,%s)",(task.title,task.subject,task.priority,False,user_id))
     conn.commit()
 
     cursor.close()
@@ -150,12 +152,6 @@ def delete_task(id:int, token: str= Depends(oauth2_scheme)):
 
     return {"message":"Task deleted"}
 
-
-
-    
-
-
-
 @app.get("/")
 def home ():
     return {"message": "AI study planner Backend Working"}
@@ -189,7 +185,9 @@ def get_tasks(token: str= Depends(oauth2_scheme)):
         tasks.append ({
             "id":row[0],
             "title": row[1],
-            "completed":row[2]
+            "completed":row[2],
+            "subject": row[4],
+            "priority":row[5]
         })
 
     cursor.close()
@@ -203,7 +201,11 @@ class UserCreate(BaseModel):
 
 @app.post("/signup")
 def signup(user: UserCreate):
-    
+    if (user.username.strip()=="" or user.password.strip()==""):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid usename"
+        )
     hashed_password = bcrypt.hash(user.password)
     
     conn = psycopg2.connect(
@@ -274,9 +276,6 @@ def login(user: UserLogin):
             status_code=401,
             detail="Invalid password"
         )
-
-
-    
 
 
 
