@@ -45,6 +45,7 @@ class TaskCreate(BaseModel):
     title:str
     subject:str
     priority:str
+    deadline:str
 
 @app.post("/tasks")
 def create_task(task: TaskCreate,
@@ -66,7 +67,7 @@ def create_task(task: TaskCreate,
 
 
     user_id = row[0]
-    cursor.execute("INSERT INTO tasks (title,subject, priority, completed,user_id) VALUES (%s,%s,%s,%s,%s)",(task.title,task.subject,task.priority,False,user_id))
+    cursor.execute("INSERT INTO tasks (title,subject, priority, deadline, completed,user_id) VALUES (%s,%s,%s,%s,%s,%s)",(task.title,task.subject,task.priority,task.deadline ,False,user_id))
     conn.commit()
 
     cursor.close()
@@ -187,7 +188,8 @@ def get_tasks(token: str= Depends(oauth2_scheme)):
             "title": row[1],
             "completed":row[2],
             "subject": row[4],
-            "priority":row[5]
+            "priority":row[5],
+            "deadline":str(row[6])
         })
 
     cursor.close()

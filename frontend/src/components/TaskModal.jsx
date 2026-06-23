@@ -3,6 +3,7 @@ import { useState } from "react" ;
     const [title, setTitle] = useState("")
     const [subject , setSubject] = useState("")
     const [priority, setPriority]=useState("Medium")
+    const [deadline, setDeadline]=useState ("")
     return (
         <div className="fixed inset-0 bg-black/50 felx items-center justify-center">
             <div className="bg-white p-6 rounded-xl w-96 shadow-xl">
@@ -33,6 +34,12 @@ import { useState } from "react" ;
                     <option>Low</option>
                 </select>
 
+                <input 
+                value={deadline}
+                onChange={(e)=>setDeadline(e.target.value)} 
+                type="date" 
+                className="w-full border p-3 rounded-lg " />
+
                 <div className="flex justify-end gap-2">
                     <button onClick={()=>setShowModal(false)}
                     className="px-4 py2 bg-red-500 rounded text-white">
@@ -41,7 +48,7 @@ import { useState } from "react" ;
 
                     <button 
                     onClick={()=>{
-                        addTask (title, subject, priority)
+                        addTask (title, subject, priority,deadline)
                         setShowModal(false)
                     }}
                     className="px-4 py2 bg-blue-500 rounded text-white">

@@ -17,6 +17,26 @@ function TaskList ({tasks , deleteTask, updateTask, toggleTask}){
 
                     else
                         borderColor="border-l-green-500";
+                    
+
+                    let priorityStyle="";
+
+                    if (task.priority==="High")
+                        priorityStyle="bg-red-100 text-red-700";
+
+                    else if (task.priority==="Medium")
+                        priorityStyle="bg-yellow-100 text-yellow-700";
+
+                    else
+                        priorityStyle="bg-green-100 text-green-700";
+
+                    let formattedDeadline ="";
+                    if (task.deadline){
+                        formattedDeadline = new Date(task.deadline).toLocaleDateString("en-In",{
+                            day:"numeric",
+                            month:"short"
+                        });
+                    }
 
                  return (   
 
@@ -41,23 +61,24 @@ function TaskList ({tasks , deleteTask, updateTask, toggleTask}){
                  ${task.completed ? "opacity-70":""}
                  `}>
                     
-                  <div className="flex gap-3, text-xl items-start ">
+                  <div className="flex gap-3, text-xl flex-1 ">
                         <input type="checkbox" 
                         checked= {task.completed}
                         onChange={()=>toggleTask(index)} />
 
-                    <div>
+                    <div className="flex items-center justify-between flex-1">
                         <h2
-                         className={task.completed ? "line-through text-green-700":""}>
+                         className={` text-lg font-semibold ${task.completed ? "line-through text-green-700":""}`}>
                             {task.title}
                         </h2>
-
-                        <p className="text-sm text-gray-600">{task.subject}</p>
-                        <p className="text-sm text-gray-600">{task.priority}</p>
                         
+                        <div className="flex gap-3 mr-30">
+                        <span className="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-700">{task.subject}</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${priorityStyle}`}>{task.priority}</span>
+                        <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">{formattedDeadline}</span>
                   </div>
                   </div>
-                    
+                </div>
                     
 
                 <div className="flex gap-2">

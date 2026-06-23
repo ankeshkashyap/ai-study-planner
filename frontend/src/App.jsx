@@ -54,7 +54,7 @@ function App() {
     );
   }
 
-  async function addTask(title, subject, priority) {
+  async function addTask(title, subject, priority,deadline) {
         if(title.trim() === "" || subject.trim === "") return
 
       const token = localStorage.getItem("token");
@@ -68,7 +68,8 @@ function App() {
                 body: JSON.stringify({
                     title,
                     subject,
-                    priority
+                    priority,
+                    deadline
                 })
             });
     setTasks([...tasks, 
@@ -76,7 +77,8 @@ function App() {
               title,
               subject,
               priority,
-              completed : false
+              completed : false,
+              deadline
             }
           ])
 
