@@ -20,6 +20,7 @@ function App() {
   const[isLoaded, setIsLoaded]=useState(false)
   const [showModal, setShowModal]=useState(false)
   const token =localStorage.getItem("token");
+  
   useEffect(()=>
   { 
     if(!loggedIn) return;
@@ -31,8 +32,14 @@ function App() {
      })
      .then(response => response.json())
      .then(data => {
-      console.log (data)
-      setTasks(data)
+
+      const sortedTasks =[...data].sort((a, b)=>{
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return new Date(a.deadline) - new Date (b.deadline) 
+      });
+
+      setTasks(sortedTasks)
      }) 
   },[loggedIn])
 
@@ -130,10 +137,11 @@ function App() {
             setTasks(updatedTasks)
         }
 
-    async  function toggleTask(index){
-     const updateTask = tasks[index]
+    async  function toggleTask(taskId){
+     const taskToToggle = tasks.find(
+      task => task.id === taskId )
     const token = localStorage.getItem("token")
-    const response =  await fetch (`http://127.0.0.1:8000/tasks/${updateTask.id}`,
+    const response =  await fetch (`http://127.0.0.1:8000/tasks/${taskToToggle.id}`,
             {
                 method: "PUT",
                 headers: {
@@ -141,18 +149,16 @@ function App() {
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                completed:!updateTask.completed
+                completed:!taskToToggle.completed
                 })
             });
-            const updatedTasks=[...tasks]
-            updatedTasks[index] = {
-              ...updatedTasks[index],
-              completed: !updatedTasks[index].completed
-            }
-            
             const data =await response.json()
-            setTasks(updatedTasks)
+            setTasks(
+              tasks.map(task => task.id === taskId?{...task,completed:!task.completed} : task)
+            )
     }
+    console.log(tasks)
+    console.log(typeof tasks)
   const completedTasks = tasks.filter(
     (task)=> task.completed
   )
